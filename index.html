@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#2563eb">
+<meta name="apple-mobile-web-app-title" content="Promille">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Promille-App</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--tx:#1b1f24;--mut:#5d6672;--ac:#2563eb;--bd:#dde1e6;--warn:#b45309;--bad:#b91c1c;--ok:#15803d;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#111418;--card:#1b2027;--tx:#e8ebef;--mut:#9aa4b0;--ac:#6ea0ff;--bd:#2c333c;--warn:#f59e0b;--bad:#f87171;--ok:#4ade80;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#111418;--card:#1b2027;--tx:#e8ebef;--mut:#9aa4b0;--ac:#6ea0ff;--bd:#2c333c;--warn:#f59e0b;--bad:#f87171;--ok:#4ade80;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+main{max-width:520px;margin:0 auto;padding:16px}
+h1{font-size:1.4rem;margin:8px 0 12px}
+h2{font-size:1rem;margin:0 0 10px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:12px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label{display:block;font-size:.8rem;color:var(--mut);margin-bottom:3px}
+input,select,button{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--tx)}
+button{background:var(--ac);color:#fff;border:0;font-weight:600;cursor:pointer}
+button.sec{background:transparent;color:var(--ac);border:1px solid var(--bd)}
+.presets{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.presets button{padding:12px 8px;font-size:.9rem}
+.drink{display:grid;grid-template-columns:1.1fr 1fr 1fr auto;gap:6px;align-items:end;margin-bottom:8px}
+.drink input{padding:8px;font-size:.9rem}
+.drink.o{grid-template-columns:1.6fr 1fr auto}
+.presets.p3{grid-template-columns:1fr 1fr 1fr}.presets.p3 button{padding:10px 4px;font-size:.8rem}
+.drink button{width:auto;padding:8px 12px}
+.big{font-size:3rem;font-weight:700;line-height:1.1}
+.mut{color:var(--mut);font-size:.85rem}
+.note{font-size:.78rem;color:var(--mut);margin-top:8px}
+svg{width:100%;height:auto;display:block;margin-top:10px}
+</style>
+</head>
+<body>
+<main>
+<h1>🍺 Promille-App</h1>
+
+<div class="card">
+<div class="mut">Geschätzter Promillewert jetzt</div>
+<div class="big" id="bac">0,00 ‰</div>
+<div id="lvl" style="font-weight:600;margin:4px 0 6px"></div>
+<div class="mut" id="det"></div>
+<div id="chart"></div>
+</div>
+
+<div class="card">
+<h2>Getränk hinzufügen (Uhrzeit = jetzt)</h2>
+<div class="presets" id="presets"></div>
+<div class="row">
+<div><label for="cml">Eigene Menge (ml)</label><input id="cml" type="number" inputmode="decimal" value="500"></div>
+<div><label for="cpc">Alkohol (Vol.-%)</label><input id="cpc" type="number" inputmode="decimal" step="0.1" value="5"></div>
+</div>
+<button style="margin-top:10px" id="addc">+ Eigenes Getränk</button>
+</div>
+
+<div class="card">
+<h2>Essen &amp; alkoholfreie Getränke (Uhrzeit = jetzt)</h2>
+<div class="presets p3" id="presets2"></div>
+<div class="mut">Essen bremst die Aufnahme von Alkohol und senkt den Höchstwert. Wasser, Kaffee und Co. machen nicht nüchtern, Wasser schützt nur vor Dehydrierung und Kater.</div>
+</div>
+
+<div class="card">
+<h2>Getrunken</h2>
+<div id="list" class="mut">Noch nichts eingetragen.</div>
+<button class="sec" id="clear" style="margin-top:8px">Alle Getränke löschen</button>
+</div>
+
+<div class="card">
+<h2>Körperdaten</h2>
+<div class="row">
+<div><label for="sex">Geschlecht</label><select id="sex"><option value="0.7">Männlich</option><option value="0.6">Weiblich</option></select></div>
+<div><label for="age">Alter</label><input id="age" type="number" inputmode="numeric" value="20"></div>
+<div><label for="h">Größe (cm)</label><input id="h" type="number" inputmode="numeric" value="185"></div>
+<div><label for="w">Gewicht (kg)</label><input id="w" type="number" inputmode="decimal" value="75"></div>
+</div>
+</div>
+
+<p class="note">Nur eine grobe Schätzung nach der Widmark-Formel (Abbau pauschal 0,15 ‰ pro Stunde, Essen pauschal als Aufnahmeverzögerung und Resorptionsdefizit von 10 bis 30 %). Der echte Wert kann deutlich abweichen, z. B. durch Essen, Medikamente oder Tagesform. Nicht als Grundlage benutzen, ob du noch Auto, Roller oder Fahrrad fahren kannst. Im Zweifel: nicht fahren.</p>
+</main>
+<script>
+var KEY="promille_v1";
+var PRESETS=[["Bier 0,5 l",500,5],["Bier 0,33 l",330,5],["Wein 0,2 l",200,12],["Sekt 0,1 l",100,11],["Schnaps 4 cl",40,38],["Mixgetränk 0,3 l",300,10]];
+var S={sex:"0.7",age:20,h:185,w:75,drinks:[]};
+try{var raw=localStorage.getItem(KEY);if(raw){var p=JSON.parse(raw);if(p&&typeof p==="object")for(var k in S)if(p[k]!==undefined)S[k]=p[k]}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function $(i){return document.getElementById(i)}
+function f2(x){return x.toFixed(2).replace(".",",")}
+function hm(ts){var d=new Date(ts);return ("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2)}
+["sex","age","h","w"].forEach(function(id){
+  $(id).value=S[id];
+  $(id).onchange=function(){S[id]=$(id).value;save();update()};
+});
+PRESETS.forEach(function(p){
+  var b=document.createElement("button");b.textContent="+ "+p[0];
+  b.onclick=function(){add(p[1],p[2])};$("presets").appendChild(b);
+});
+$("addc").onclick=function(){add(parseFloat($("cml").value)||0,parseFloat($("cpc").value)||0)};
+var clrT=null;
+$("clear").onclick=function(){
+  var b=$("clear");
+  if(!S.drinks.length)return;
+  if(clrT){clearTimeout(clrT);clrT=null;b.textContent="Alle Getränke löschen";S.drinks=[];save();renderList();update();return}
+  b.textContent="Wirklich alle löschen? Nochmal tippen";
+  clrT=setTimeout(function(){clrT=null;b.textContent="Alle Getränke löschen"},4000);
+};
+function isA(d){return !d.k||d.k==="a"}
+function add(ml,pc){if(ml<=0)return;S.drinks.push({k:"a",ml:ml,pc:pc,t:Date.now()});save();renderList();update()}
+var OTHER=[["🥨 Snack","f",1,"Kleiner Snack"],["🍝 Mahlzeit","f",2,"Normale Mahlzeit"],["🍔 Große Mahlzeit","f",3,"Große/fettreiche Mahlzeit"],["💧 Wasser 0,3 l","n",300,"Wasser"],["🥤 Saft/Limo 0,3 l","n",300,"Saft/Limo"],["☕ Kaffee/Tee","n",200,"Kaffee/Tee"]];
+OTHER.forEach(function(o){
+  var b=document.createElement("button");b.textContent=o[0];
+  b.onclick=function(){
+    var d={k:o[1],lb:o[3],t:Date.now()};
+    if(o[1]==="f")d.lv=o[2];else d.ml=o[2];
+    S.drinks.push(d);save();renderList();update();
+  };
+  $("presets2").appendChild(b);
+});
+function setTime(d,val){
+  var v=val.split(":");if(v.length<2)return;
+  var t=new Date();t.setHours(+v[0],+v[1],0,0);
+  if(t.getTime()>Date.now()+300000)t.setDate(t.getDate()-1);
+  d.t=t.getTime();
+}
+function renderList(){
+  var L=$("list");
+  if(!S.drinks.length){L.textContent="Noch nichts eingetragen.";return}
+  L.innerHTML="";
+  S.drinks.forEach(function(d,i){
+    var r=document.createElement("div");
+    if(isA(d)){
+      r.className="drink";
+      r.innerHTML='<div><label>Menge ml</label><input type="number" inputmode="decimal" value="'+d.ml+'"></div>'+
+        '<div><label>Vol.-%</label><input type="number" inputmode="decimal" step="0.1" value="'+d.pc+'"></div>'+
+        '<div><label>Uhrzeit</label><input type="time" value="'+hm(d.t)+'"></div>'+
+        '<button class="sec" aria-label="Entfernen">✕</button>';
+      var ins=r.querySelectorAll("input");
+      ins[0].onchange=function(){d.ml=parseFloat(ins[0].value)||0;save();update()};
+      ins[1].onchange=function(){d.pc=parseFloat(ins[1].value)||0;save();update()};
+      ins[2].onchange=function(){setTime(d,ins[2].value);save();update()};
+    }else{
+      r.className="drink o";
+      r.innerHTML='<div><label>'+(d.k==="f"?"Essen":"Alkoholfrei")+'</label><div style="padding:8px 0">'+d.lb+(d.k==="n"?" ("+d.ml+" ml)":"")+'</div></div>'+
+        '<div><label>Uhrzeit</label><input type="time" value="'+hm(d.t)+'"></div>'+
+        '<button class="sec" aria-label="Entfernen">✕</button>';
+      var tin=r.querySelector("input");
+      tin.onchange=function(){setTime(d,tin.value);save();update()};
+    }
+    r.querySelector("button").onclick=function(){S.drinks.splice(i,1);save();renderList();update()};
+    L.appendChild(r);
+  });
+}
+var FOOD=[{def:0,dur:30},{def:0.10,dur:60},{def:0.20,dur:90},{def:0.30,dur:120}];
+function foodAt(t){
+  var lv=0;
+  S.drinks.forEach(function(f){if(f.k==="f"&&f.t>=t-7200000&&f.t<=t+3600000)lv=Math.max(lv,f.lv||0)});
+  return FOOD[lv];
+}
+function sim(now){
+  var r=parseFloat(S.sex),w=parseFloat(S.w);
+  var ds=S.drinks.filter(function(d){return isA(d)&&d.t<=now}).sort(function(a,b){return a.t-b.t});
+  if(!ds.length||!(w>0))return null;
+  var items=ds.map(function(d){
+    var f=foodAt(d.t);
+    return {t:d.t,A:d.ml*d.pc/100*0.8*(1-f.def)/(w*r),dur:f.dur*60000};
+  });
+  var endAbs=0;items.forEach(function(x){endAbs=Math.max(endAbs,x.t+x.dur)});
+  function cum(x,t){return x.A*Math.min(1,Math.max(0,(t-x.t)/x.dur))}
+  var pts=[],bac=0,t=Math.floor(ds[0].t/60000)*60000,cur=null,sober=null;
+  for(var n=0;n<2880*2;n++,t+=60000){
+    var inc=0;
+    items.forEach(function(x){inc+=cum(x,t)-cum(x,t-60000)});
+    bac=Math.max(0,bac+inc-0.15/60);
+    pts.push([t,bac]);
+    if(t<=now)cur=bac;
+    if(t>=now&&t>=endAbs&&bac===0){sober=t;break}
+  }
+  var peak=0;pts.forEach(function(p){if(p[1]>peak)peak=p[1]});
+  return {pts:pts,cur:cur||0,sober:sober,t0:ds[0].t,peak:peak,now:now};
+}
+function chart(s){
+  var W=320,H=130,pl=28,pb=18,pt=6,pr=6;
+  var x0=s.t0,x1=Math.max(s.pts[s.pts.length-1][0],s.now+1800000);
+  var ym=Math.max(0.6,s.peak*1.15);
+  function X(t){return pl+(t-x0)/(x1-x0)*(W-pl-pr)}
+  function Y(v){return H-pb-(v/ym)*(H-pb-pt)}
+  var g='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Promille-Verlauf">';
+  [0.5,1.1].forEach(function(v){if(v<ym){g+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="var(--bd)" stroke-dasharray="4 3"/><text x="2" y="'+(Y(v)+3)+'" font-size="9" fill="var(--mut)">'+f2(v)+'</text>'}});
+  g+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+Y(0)+'" y2="'+Y(0)+'" stroke="var(--bd)"/><text x="2" y="'+(Y(0)+3)+'" font-size="9" fill="var(--mut)">0</text>';
+  g+='<polyline fill="none" stroke="var(--ac)" stroke-width="2" points="'+s.pts.map(function(p){return X(p[0]).toFixed(1)+","+Y(p[1]).toFixed(1)}).join(" ")+'"/>';
+  var nx=X(s.now);
+  g+='<line x1="'+nx+'" x2="'+nx+'" y1="'+pt+'" y2="'+Y(0)+'" stroke="var(--warn)" stroke-dasharray="2 2"/><circle cx="'+nx+'" cy="'+Y(s.cur)+'" r="4" fill="var(--warn)"/>';
+  g+='<text x="'+pl+'" y="'+(H-4)+'" font-size="9" fill="var(--mut)">'+hm(x0)+'</text><text x="'+(W-pr)+'" y="'+(H-4)+'" font-size="9" text-anchor="end" fill="var(--mut)">'+hm(x1)+'</text></svg>';
+  return g;
+}
+function update(){
+  var now=Date.now(),s=sim(now);
+  var soft=0,food=false;
+  S.drinks.forEach(function(d){if(d.t<=now){if(d.k==="n")soft+=d.ml;if(d.k==="f")food=true}});
+  var extra=(food?"<br>Essen wird berücksichtigt (langsamere, geringere Aufnahme)":"")+(soft?"<br>Alkoholfrei getrunken: "+soft+" ml (senkt den Promillewert nicht)":"");
+  if(!s){$("bac").textContent="0,00 ‰";$("lvl").textContent="";$("det").innerHTML="Trag ein alkoholisches Getränk ein, dann läuft die Berechnung."+extra;$("chart").innerHTML="";return}
+  var b=s.cur;$("bac").textContent=f2(b)+" ‰";
+  var t,c;
+  if(b<0.05){t="Kaum messbar";c="--ok"}
+  else if(b<0.3){t="Leichte Wirkung";c="--ok"}
+  else if(b<0.5){t="Reaktion bereits beeinträchtigt";c="--warn"}
+  else if(b<1.1){t="Ab 0,5 ‰ fahruntüchtig im Sinne der Bußgeldregeln";c="--warn"}
+  else{t="Ab 1,1 ‰ absolute Fahruntüchtigkeit";c="--bad"}
+  $("lvl").textContent=t;$("lvl").style.color="var("+c+")";
+  var g=0;S.drinks.forEach(function(d){if(isA(d)&&d.t<=now)g+=d.ml*d.pc/100*0.8});
+  var rest=s.sober?Math.max(0,s.sober-now):0,h=Math.floor(rest/3600000),m=Math.ceil((rest%3600000)/60000);
+  if(m===60){h++;m=0}
+  $("det").innerHTML="Reiner Alkohol: "+g.toFixed(1).replace(".",",")+" g · Höchstwert bisher: "+f2(s.peak)+" ‰<br>"+
+    (b>0&&s.sober?"Rechnerisch 0,0 ‰ um "+hm(s.sober)+" Uhr (in "+h+" Std. "+m+" Min.)":"Rechnerisch bereits abgebaut")+extra;
+  $("chart").innerHTML=chart(s);
+}
+renderList();update();
+setInterval(update,30000);
+if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}
+</script>
+</body>
+</html>
